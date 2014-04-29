@@ -1,12 +1,12 @@
 /*****
- * build 4 sound processes 
- * use lots of different controllers to play the same 4 sounds! 
- * test whether all the Library installs (quarks) work smoothly 
+ * build 4 sound processes
+ * use lots of different controllers to play the same 4 sounds!
+ * test whether all the Library installs (quarks) work smoothly
 
-The four proxies are: 
-	s4_formsing, 
-	s5_allArm, 
-	s6_moogSing, 
+The four proxies are:
+	s4_formsing,
+	s5_allArm,
+	s6_moogSing,
 	s7_kiteHi0
 
 in the class, map them to different audio chans
@@ -14,9 +14,9 @@ in the class, map them to different audio chans
 *********/
 
 
-	// OVERVIEW: 
+	// OVERVIEW:
 
-		// 1. simple guis 
+		// 1. simple guis
 	NdefGui			// OK, in 3.4
 	ProxyMixer		// OK, in 3.4
 	Handmade gui with 2DSliders // OK
@@ -24,12 +24,12 @@ in the class, map them to different audio chans
 
 		// 2. GamePad - sorry still osx only
 	Impact		// install GamePad quark, then OK
-	Ferrari		// OK 
+	Ferrari		// OK
 
-	
+
 		// 3. MIDI ctl
-	Nano		// install JITMIDIKtl, OK 
- 
+	Nano		// install JITMIDIKtl, OK
+
 						// multitouch - OSX 10.5 and up
 	MultiTouchPad	// install MultiTouchPad quark
 						// 1st finger is first proxy, 2 is 2, etc
@@ -38,58 +38,60 @@ in the class, map them to different audio chans
 	KeyPlayer // 1-9 is amp, q-p is param 1, a - l param2 etc.
 
 		// OSX, linux
-	Cyborg	// GeneralHID, OK on osx, test on linux! 
-	 
+	Cyborg	// GeneralHID, OK on osx, test on linux!
+
 
 ///////////////// code //////////////
 
-//////	// Library install party - all installed in the Standalone! 
+//////	// Library install party - all installed in the Standalone!
 
 ////// Quarks.checkoutAll;		// get the latest, wait till process completed
-////// 	// cross platform: 
+////// 	// cross platform:
 ////// Quarks.install("KeyPlayer");
 //////
 ////// Quarks.install("JITLib extensions");
 ////// Quarks.install("JITMIDIKtl");
-////// 
+//////
 //////		// sorry, OS X only ATM!
 ////// Quarks.install("GamePad");
 ////// Quarks.install("MultiTouchPad");
 
 
-	// copy the line posted here: 
+	// copy the line posted here:
 ("(\nsudo cp " + "tongsengmod".resolveRelative + "/usr/bin\n)");
-	// and paste it into the Terminal window: 
+	// and paste it into the Terminal window:
 unixCmd("open /Applications/Utilities/Terminal.app/");
 	// hit enter, allow copying the file by password ...
 
 
 	// When done, recompile:
-thisProcess.recompile; 
+thisProcess.recompile;
 
 
 
 (	// prep
 s.boot;
 
+
 p = p ?? { ProxySpace.new }; p.push;
+q = q ? ();
 q.pxmix = ProxyMixer(p, 8);
 
 (		// if it uses { |val| val / -255 } etc, put these new functions in the map:
 Impact.normMaps[Impact.vendorID].putAll(
-	(	'joyRX': { |val| val - 127 / -255 }, 
-		'joyLY': { |val| val + 128 /  255 }, 
-		'joyLX': { |val| val - 127 / -255 }, 
+	(	'joyRX': { |val| val - 127 / -255 },
+		'joyLY': { |val| val + 128 /  255 },
+		'joyLX': { |val| val - 127 / -255 },
 		'joyRY': { |val| val + 128 /  255 }
    	)
-   		// postcs to check that the new functions are there: 
+   		// postcs to check that the new functions are there:
 ).postcs;
 );
 q = q ?? {()};
 GamePad.startHID(q.pxmix);
 
 )
-/* 
+/*
 GamePad.verbose = true;
 GamePad.verbose = false;
 GamePad.stop;
@@ -105,7 +107,9 @@ GamePad.stop;
 q.ndefs = [~s4_formsing, ~s5_allArm, ~s6_moogSing, ~s7_kiteHi0];
 )
 
-	// make 4 NdefGuis for them 
+
+
+	// make 4 NdefGuis for them
 	// these show changes for all of them
 (
 w = Window("Proxies:", Rect(600, 0, 400, 800)).front;
@@ -127,23 +131,23 @@ s.latency = 0.05;	// default: do it a bit later, but precisely timed.
 	w = Window("xy sliders", Rect(0,600,400, 250)).front;
 	w.addFlowLayout;
 		// 4 buttons to switch them
-	q.sl2dButtons = q.ndefs.collect { |px| 
+	q.sl2dButtons = q.ndefs.collect { |px|
 		Button(w, Rect(0,0, 90, 30))
 			.states_([
-				[px.key.asString], 
+				[px.key.asString],
 				[px.key.asString, Color.white, Color.red]
 			])
-			.action = { |b| 
-				q.sl2dButtons.do { |but| 
+			.action = { |b|
+				q.sl2dButtons.do { |but|
 					but.value = (but == b).binaryValue;
-					q.sl2dProxy = px; 
+					q.sl2dProxy = px;
 				};
 			};
 	};
 
 	v = 2.collect { |i| Slider2D(w, Rect(0, 0, 190, 190))	};
-	
-	v[0].action = { |sl| 
+
+	v[0].action = { |sl|
 		var keys = q.sl2dProxy.getKeysValues.collect(_[0]);
 		var keyLX = keys[2];
 		var keyLY = keys[3];
@@ -153,7 +157,7 @@ s.latency = 0.05;	// default: do it a bit later, but precisely timed.
 		);
 	};
 
-	v[1].action = { |sl| 
+	v[1].action = { |sl|
 		var keys = q.sl2dProxy.getKeysValues.collect(_[0]);
 		var keyRX = keys[0];
 		var keyRY = keys[1];
@@ -162,17 +166,16 @@ s.latency = 0.05;	// default: do it a bit later, but precisely timed.
 			keyRY, keyRY.asSpec.map(sl.y)
 		);
 	};
-)		
+)
 
 
 ////////// MIDI control - very compressed example;
 //// uses JITMIDI easy methods;
-// attach NanoKtl first, 
+// attach NanoKtl first,
 // linux - make sure MIDI works ...
 (
 q.nano = NanoKtl.new;
 (1..4).do { |i| q.nano.mapToNdefGui(q.ndefGuis[i - 1], i) };
-
 )
 //////////
 
@@ -185,16 +188,16 @@ q.wacomProxy = ~s4_formsing;
 q.wwin = Window("Tablet Control!", Rect(0, 200, 400, 400)).front;
 q.wwin.addFlowLayout;
 
-q.wacomButtons = q.ndefs.collect { |px| 
+q.wacomButtons = q.ndefs.collect { |px|
 	Button(q.wwin, Rect(0,0, 90, 30))
 		.states_([
-			[px.key.asString], 
+			[px.key.asString],
 			[px.key.asString, Color.white, Color.red]
 		])
-		.action = { |b| 
-			q.wacomButtons.do { |but| 
+		.action = { |b|
+			q.wacomButtons.do { |but|
 				but.value = (but == b).binaryValue;
-				q.wacomProxy = px; 
+				q.wacomProxy = px;
 			};
 		};
 };
@@ -206,7 +209,7 @@ q.tablet.background = Color.white;
 
 q.tabSetFunc = { |dict, vals| // normalized;
 	var keysVals = q.wKeys.collect { |key, i|
-		[key, key.asSpec.map(vals[i])]; 
+		[key, key.asSpec.map(vals[i])];
 	};
 	q.wacomProxy.set(*keysVals.flat);
 };
@@ -229,20 +232,20 @@ q.tablet.mouseUpAction = { arg view,x,y,pressure,tiltx,tilty,deviceID;
 )
 
 // Attach a GamePad, e.g. Saitek Impact, or Ferrari;
-// then : 
+// then :
 GamePad.startHID;
 
 // right thumb: press button 2, so you are in wing 4
 // left thumb select one of the 4 patches
-// joysticks - 4 params of proxies are controlled; 
+// joysticks - 4 params of proxies are controlled;
 // right up-down is volume on all patches.
-// see GamePad help file ... 
+// see GamePad help file ...
 
 
 (
 MultiTouchPad.start;
 
-q[\mtSetFunc] = {|curID, xys| 
+q[\mtSetFunc] = {|curID, xys|
 		var prox = q.ndefs.wrapAt(curID);
 		var proxKeys = prox.getKeysValues.keep(3)
 			.collect(_[0]);
@@ -260,10 +263,10 @@ MultiTouchPad.setAction = q[\mtSetFunc];
 MultiTouchPad.untouchAction = q[\mtSetFunc];
 
 q.mtGui = MultiTouchPad.gui;
-MultiTouchPad.guiWin.view.keyDownAction = { |view, char| 
+MultiTouchPad.guiWin.view.keyDownAction = { |view, char|
 	if (char == $.) { MultiTouchPad.stop };
 	if (char == $ ) { MultiTouchPad.start };
-	
+
 };
 )
 
@@ -275,16 +278,16 @@ Quarks.install("KeyPlayer");
 
 KeyPlayer.all.clear;
 (
-q.ndefs.collect { |ndef| 
+q.ndefs.collect { |ndef|
 	var k = KeyPlayer(ndef.key.asString.drop(3).keep(4).asSymbol);
 	var ndefParams = ndef.getKeysValues.keep(4).collect(_[0]);
 		// four lines of keys move four params:
-	[	"1234567890", 
+	[	"1234567890",
 		"qwertyuiop",
 		"asdfghjkl;",
-		"zxcvbnm,.;" ].do { |line, i| 
+		"zxcvbnm,.;" ].do { |line, i|
 			line.do { |char, j|
-				k.put(char, { 
+				k.put(char, {
 					var param = ndefParams[i];
 					ndef.set(param, param.asSpec.map(j / 9));
 				});
@@ -297,13 +300,13 @@ KeyPlayer.gui;
 
 
 // 	Saitek Cyborg Flight control Joystick
-	
+
 GeneralHID.buildDeviceList;
 GeneralHID.postDevices;
 (
-q.cyborgArr = GeneralHID.deviceList.detect { |arr| 
+q.cyborgArr = GeneralHID.deviceList.detect { |arr|
 		arr[0].product == "Cyborg X"; };
-)		
+)
 	q.cyborgArr[0];	// the platform-specific device
 	q.cyborgArr[1];	// the info on the device
 
@@ -313,44 +316,44 @@ GeneralHID.startEventLoop;
 q.cyborg.device.device.elements.do(_.dump);
 q.cyborg.caps;
 q.cyborg.makeGui;
-	
+
 	// this dict has the buttons
 q.cyborg.slots[1].keys;
 
 	// this has the continuous controls (sliders etc)
 q.cyborg.slots[3].keys;
 
-	// ... lets name them like that!  
+	// ... lets name them like that!
 q.cybSliders = q.cyborg.slots[3];
 q.cybButtons = q.cyborg.slots[1];
 
-	// now we want the leftmost lever/slider 
-		// to be \amp: 
+	// now we want the leftmost lever/slider
+		// to be \amp:
 q.cybSliders[50].action = { |slot| slot.value.postln };
 (
 q.cybNdef = ~s4_formsing;
 	// leftmost slider:
-q.cybSliders[50].action = { |slot| 
+q.cybSliders[50].action = { |slot|
 	q.cybNdef.set(\amp, \amp.asSpec.map(slot.value))
 };
  )
 
 	// use 4 buttons for left thumb, 6, 7, 8, 9,
-	// to switch between 4 ndefs: 
+	// to switch between 4 ndefs:
 (
 [6, 7, 8, 9].do { |butnum, i|
-	q.cybButtons[butnum].action = { |slot| 
+	q.cybButtons[butnum].action = { |slot|
 		q.cybNdef = q.ndefs[i].postcs;
 	};
 };
 )
 
-	// keep amp as is, next 3 params are controlled by joystick: 
+	// keep amp as is, next 3 params are controlled by joystick:
 	// LR = 48, frontback = 49, rotation = 53;
 (
 	// left lever, LR, FB, Rot
 [50, 48, 49, 53].do { |ctlNum, i|
-	q.cybSliders[ctlNum].action = { |slot| 
+	q.cybSliders[ctlNum].action = { |slot|
 		var parKey = q.cybNdef.getKeysValues[i][0];
 		q.cybNdef.set(parKey, parKey.asSpec.map(slot.value))
 	};

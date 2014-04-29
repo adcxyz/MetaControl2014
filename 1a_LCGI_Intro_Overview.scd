@@ -1,7 +1,7 @@
 Lose Control, Gain Influence
 
 
-Background 1 - Control and Communication und Beobachtung :
+Background 1 - Control and Communication, and Observation :
 
 The big promise of SciTech : Weltbeherrschung,
 alles was man versteht kann man auch in den Griff kriegen.
